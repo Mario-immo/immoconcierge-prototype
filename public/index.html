@@ -29,7 +29,7 @@ nav a{color:var(--olive);text-decoration:none;font-size:14px;margin-left:16px}
 .inputrow input{flex:1;border:none;font-size:16px;padding:12px;background:var(--cream);border-radius:14px;font-family:inherit;outline:none}
 .mic,.send{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;flex-shrink:0}
 .mic{background:var(--olive)}.send{background:var(--terra)}
-.mic.rec{animation:p 1s infinite;background:#B33}
+.mic.rec{animation:p 1s infinite;background:#B33}.mic.busy{opacity:.6}.spk{width:46px;height:46px;border-radius:50%;border:1px solid #ccc;background:#fff;cursor:pointer;flex-shrink:0;font-size:18px}.spk.on{background:var(--olive);color:#fff}#vstat{font-size:13px;color:#B33;min-height:16px;margin:4px 6px 0}
 @keyframes p{50%{box-shadow:0 0 0 10px rgba(179,51,51,.2)}}
 .alt{text-align:center;margin:12px 0 0;font-size:13px}.alt a{color:var(--muted)}
 .typing{display:flex;gap:4px;padding:14px}.typing i{width:7px;height:7px;background:#aaa;border-radius:50%;animation:b 1s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
@@ -58,7 +58,7 @@ section h2{font-size:30px;text-align:center;margin-bottom:22px}
 .makler a{color:var(--terra-d);font-weight:600}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
 .hidden{display:none}
-@media(max-width:600px){nav{display:none}.inputrow input{min-width:0;font-size:15px}.mic,.send{width:42px;height:42px}}
+@media(max-width:600px){nav{display:none}.inputrow input{min-width:0;font-size:15px}.mic,.send,.spk{width:42px;height:42px}}
 </style></head><body>
 <header><div class="logo">Immo<span>Concierge</span></div>
 <div style="display:flex;align-items:center"><div class="langs"><button class="on">DE</button><button>EN</button><button>ES</button></div><nav class="hidden-m"><a href="#makler">Für Makler</a></nav></div></header>
@@ -68,7 +68,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
 <div class="msg bot">Hallo! Statt Suchmaske einfach ein Gespräch: Was habt ihr an der Costa del Sol vor? Tippt, sprecht – oder wählt einen Einstieg.</div>
 <div class="chips" id="start"><button class="chip" data-s="family">🏡 Auswandern mit Familie</button><button class="chip" data-s="x">☀️ Ferienhaus</button><button class="chip" data-s="x">📈 Kapitalanlage</button><button class="chip" data-s="x">🌿 Altersruhesitz</button></div>
 </div>
-<div class="inputrow"><input id="inp" placeholder="z. B. „Wir sind zu viert und wollen nach Marbella ziehen …“"><button class="mic" id="mic" title="Sprechen"><svg width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v7a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V22h2v-3.1A7 7 0 0 0 19 12z"/></svg></button><button class="send" id="send"><svg width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button></div>
+<div class="inputrow"><button class="spk" id="spk" title="Antworten vorlesen">🔇</button><input id="inp" placeholder="z. B. „Wir sind zu viert und wollen nach Marbella ziehen …“"><button class="mic" id="mic" title="Sprechen"><svg width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v7a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V22h2v-3.1A7 7 0 0 0 19 12z"/></svg></button><button class="send" id="send"><svg width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button></div><div id="vstat"></div>
 </div><p class="alt"><a href="#" onclick="alert('Prototyp: Klassische Filtersuche folgt.');return false">Lieber klassisch filtern →</a></p></div>
 
 <section id="how"><h2>So funktioniert's</h2><div class="steps">
@@ -97,13 +97,42 @@ async function ask(text){if(busy||!text)return;busy=true;const s=document.getEle
   if(!r.ok)throw new Error(await r.text());const rd=r.body.getReader(),dec=new TextDecoder();
   while(true){const {done,value}=await rd.read();if(done)break;out+=dec.decode(value,{stream:true});
    if(!el){ty.remove();add('ImmoConcierge','who');el=add('','msg bot')}el.innerHTML=fmt(out);scroll()}
-  hist.push({role:'assistant',content:out});
+  hist.push({role:'assistant',content:out});speak(out);
  }catch(e){ty.remove();add('Entschuldigung, da ist etwas schiefgelaufen. Bitte nochmal versuchen.','msg bot')}
  busy=false;scroll()}
 hist.push({role:'assistant',content:'Hallo! Statt Suchmaske einfach ein Gespräch: Was habt ihr an der Costa del Sol vor?'});
 document.querySelectorAll('#start .chip').forEach(b=>b.onclick=()=>ask(b.textContent.replace(/^\S+\s/,'')));
 function free(){const v=inp.value.trim();inp.value='';ask(v)}
 send.onclick=free;inp.onkeydown=e=>{if(e.key==='Enter')free()};
-mic.onclick=()=>{inp.placeholder='Spracheingabe folgt – bitte tippen';};
+
+let rec=null,chunks=[],stream=null,t0=0,timer=null;const vstat=document.getElementById('vstat');
+function vs(t){vstat.textContent=t||''}
+function pickType(){const c=['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg'];if(!window.MediaRecorder)return null;
+ const ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ const order=ios?c:[c[1],c[2],c[0],c[3]];for(const t of order)if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))return t;return ''}
+async function startRec(){
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){vs('Dein Browser unterstützt keine Spracheingabe. Bitte tippen.');return}
+ if(!window.isSecureContext){vs('Spracheingabe geht nur über https.');return}
+ unlockAudio();
+ try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){
+  vs(e.name==='NotAllowedError'||e.name==='SecurityError'?'Mikrofon-Zugriff verweigert. Bitte in den Browser-Einstellungen erlauben (iPhone: Einstellungen › Safari › Mikrofon).':e.name==='NotFoundError'?'Kein Mikrofon gefunden.':'Mikrofon konnte nicht gestartet werden.');return}
+ const type=pickType();try{rec=type?new MediaRecorder(stream,{mimeType:type}):new MediaRecorder(stream)}catch(e){rec=new MediaRecorder(stream)}
+ chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};rec.onstop=upload;rec.start(250);
+ mic.classList.add('rec');t0=Date.now();timer=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);vs('● Aufnahme läuft '+s+' s – zum Beenden nochmal tippen');if(s>=120)stopRec()},250);vs('● Aufnahme läuft – zum Beenden nochmal tippen')}
+function stopRec(){clearInterval(timer);mic.classList.remove('rec');if(rec&&rec.state!=='inactive')rec.stop();if(stream)stream.getTracks().forEach(t=>t.stop())}
+async function upload(){const type=(rec.mimeType||chunks[0]?.type||'audio/webm');const blob=new Blob(chunks,{type});rec=null;
+ if(Date.now()-t0<700||blob.size<1000){vs('Aufnahme zu kurz – bitte länger sprechen.');return}
+ mic.classList.add('busy');mic.disabled=true;vs('Wird übersetzt in Text …');
+ try{const r=await fetch('/api/transcribe',{method:'POST',headers:{'Content-Type':type},body:blob});if(!r.ok)throw 0;const {text}=await r.json();
+  if(!text){vs('Ich habe nichts verstanden – bitte nochmal.');}else{vs('');inp.value=text;free()}}
+ catch(e){vs('Spracherkennung fehlgeschlagen. Bitte nochmal versuchen oder tippen.')}
+ mic.classList.remove('busy');mic.disabled=false}
+mic.onclick=()=>{if(mic.disabled)return;if(rec&&rec.state==='recording')stopRec();else startRec()};
+let spkOn=false,player=new Audio();player.setAttribute('playsinline','');
+function unlockAudio(){try{player.src='data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC1CQEwTJ9mjRvBA4UOLD8nKVOWfh+UlK3z/177OXrfOdKl7pyn3Xf//WreyTRUoAWgBgkOAGbZHBgG1OF6zM82DWbZaUmMBptgQhGjsyYqc9ae9XFz280948NMBWInljyzsNRFLPWdnZGWrddDsjK1unuSrVN9jJsK8KuQtQCtMBjCEtImISdNKJOopIpBFpNSMbIHCSRpRR5iakjTiyzLhchUUBwCgyKiweBv/7UsQbg8isVNoMPMjAAAA0gAAABEVFGmgqK////9bP/6XCykxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';player.play().catch(()=>{})}catch(e){}}
+spk.onclick=()=>{spkOn=!spkOn;spk.classList.toggle('on',spkOn);spk.textContent=spkOn?'🔊':'🔇';spk.title=spkOn?'Vorlesen an':'Antworten vorlesen';unlockAudio();if(!spkOn)player.pause()};
+async function speak(t){if(!spkOn||!t)return;try{const r=await fetch('/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})});if(!r.ok)throw 0;
+ const u=URL.createObjectURL(await r.blob());player.src=u;await player.play()}catch(e){vs('Vorlesen nicht möglich (auf dem iPhone ggf. Stumm-Schalter prüfen).')}}
+
 document.querySelectorAll('.langs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.langs button').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
 </script></body></html>

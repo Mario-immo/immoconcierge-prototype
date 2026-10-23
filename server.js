@@ -18,6 +18,29 @@ const srv=http.createServer(async(req,res)=>{
     res.end();
    }catch(e){console.error(e.message);if(!res.headersSent)res.writeHead(500);res.end('Serverfehler')}
   });return}
+ if(req.method==='POST'&&req.url.startsWith('/api/transcribe')){
+  const ch=[];let n=0;req.on('data',c=>{n+=c.length;if(n<25e6)ch.push(c)});req.on('end',async()=>{
+   try{
+    if(n>=25e6){res.writeHead(413,{'Content-Type':'text/plain; charset=utf-8'});return res.end('Aufnahme zu lang')}
+    const buf=Buffer.concat(ch);if(buf.length<500){res.writeHead(400,{'Content-Type':'text/plain; charset=utf-8'});return res.end('Aufnahme zu kurz')}
+    const ct=(req.headers['content-type']||'audio/webm').split(';')[0];
+    const ext=ct.includes('mp4')||ct.includes('m4a')||ct.includes('aac')?'mp4':ct.includes('ogg')?'ogg':ct.includes('wav')?'wav':ct.includes('mpeg')?'mp3':'webm';
+    const fd=new FormData();fd.append('file',new Blob([buf],{type:ct}),'audio.'+ext);fd.append('model',process.env.STT_MODEL||'gpt-4o-mini-transcribe');
+    const r=await fetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+KEY},body:fd});
+    const t=await r.text();
+    if(!r.ok){console.error('stt',r.status,t.slice(0,300));res.writeHead(502,{'Content-Type':'text/plain; charset=utf-8'});return res.end('Fehler '+r.status)}
+    res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({text:(JSON.parse(t).text||'').trim()}));
+   }catch(e){console.error(e.message);if(!res.headersSent)res.writeHead(500);res.end('Serverfehler')}
+  });return}
+ if(req.method==='POST'&&req.url==='/api/tts'){
+  let b='';req.on('data',c=>b+=c);req.on('end',async()=>{
+   try{
+    const text=String(JSON.parse(b).text||'').replace(/\*\*/g,'').slice(0,3000);if(!text){res.writeHead(400);return res.end()}
+    const r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+KEY},body:JSON.stringify({model:process.env.TTS_MODEL||'gpt-4o-mini-tts',voice:'nova',input:text,response_format:'mp3'})});
+    if(!r.ok){console.error('tts',r.status,(await r.text()).slice(0,300));res.writeHead(502);return res.end('Fehler '+r.status)}
+    res.writeHead(200,{'Content-Type':'audio/mpeg','Cache-Control':'no-store'});res.end(Buffer.from(await r.arrayBuffer()));
+   }catch(e){console.error(e.message);if(!res.headersSent)res.writeHead(500);res.end('Serverfehler')}
+  });return}
  res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});fs.createReadStream(path.join(__dirname,'public/index.html')).pipe(res);
 });
 srv.listen(PORT,()=>console.log('ImmoConcierge läuft auf http://localhost:'+PORT+' Modell '+MODEL));
