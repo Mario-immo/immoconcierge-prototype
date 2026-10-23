@@ -1,6 +1,6 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package.json server.js ./
+COPY package.json server.js props.js ./
 COPY public ./public
 ENV NODE_ENV=production
 EXPOSE 8787
