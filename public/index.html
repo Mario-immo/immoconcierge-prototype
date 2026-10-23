@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ImmoConcierge – Costa del Sol</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--terra:#C1653F;--terra-d:#9E4E2E;--olive:#3E4A2F;--sage:#D9D6C3;--cream:#FAF5EC;--ink:#2B2A26;--muted:#6E6A5E}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,Arimo,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5}
+h1,h2,h3{font-family:'Playfair Display',serif;color:var(--olive)}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;max-width:1100px;margin:auto}
+.logo{font-family:'Playfair Display';font-weight:700;font-size:20px;color:var(--olive)}.logo span{color:var(--terra)}
+nav a{color:var(--olive);text-decoration:none;font-size:14px;margin-left:16px}
+.langs{display:flex;gap:4px}.langs button{border:1px solid var(--sage);background:#fff;border-radius:20px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--olive)}
+.langs button.on{background:var(--olive);color:#fff;border-color:var(--olive)}
+.hero{max-width:820px;margin:auto;padding:24px 20px 10px;text-align:center}
+.hero h1{font-size:clamp(30px,6vw,52px);line-height:1.15}
+.hero p.sub{margin-top:12px;font-size:17px;color:var(--terra-d);font-weight:600;letter-spacing:.3px}
+.chat{max-width:820px;margin:20px auto 0;padding:0 16px}
+.box{background:#fff;border-radius:22px;box-shadow:0 10px 40px rgba(62,74,47,.12);border:1px solid #EEE7D8;overflow:hidden}
+#log{padding:18px;display:flex;flex-direction:column;gap:10px;max-height:none}
+.msg{max-width:88%;padding:11px 15px;border-radius:18px;font-size:15px}
+.bot{background:#F2EEE2;align-self:flex-start;border-bottom-left-radius:4px}
+.me{background:var(--terra);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.who{font-size:11px;color:var(--muted);margin-bottom:-6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:2px 0}
+.chip{border:1.5px solid var(--terra);color:var(--terra-d);background:#fff;border-radius:22px;padding:8px 14px;font-size:14px;cursor:pointer;font-family:inherit}
+.chip:hover{background:var(--terra);color:#fff}
+.inputrow{display:flex;gap:8px;padding:12px;border-top:1px solid #EEE7D8;align-items:center}
+.inputrow input{flex:1;border:none;font-size:16px;padding:12px;background:var(--cream);border-radius:14px;font-family:inherit;outline:none}
+.mic,.send{width:46px;height:46px;border-radius:50%;border:none;cursor:pointer;display:grid;place-items:center;flex-shrink:0}
+.mic{background:var(--olive)}.send{background:var(--terra)}
+.mic.rec{animation:p 1s infinite;background:#B33}
+@keyframes p{50%{box-shadow:0 0 0 10px rgba(179,51,51,.2)}}
+.alt{text-align:center;margin:12px 0 0;font-size:13px}.alt a{color:var(--muted)}
+.typing{display:flex;gap:4px;padding:14px}.typing i{width:7px;height:7px;background:#aaa;border-radius:50%;animation:b 1s infinite}.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes b{50%{opacity:.3}}
+.ideas h3{font-size:22px;margin:8px 0 2px}.tag{display:inline-block;background:var(--sage);color:var(--olive);font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px}
+.cards{display:grid;grid-template-columns:1fr;gap:12px;margin-top:10px}
+@media(min-width:720px){.cards{grid-template-columns:repeat(3,1fr)}}
+.card{border:1px solid #EEE7D8;border-radius:16px;overflow:hidden;background:#fff}
+.img{height:110px;position:relative}
+.img b{position:absolute;right:10px;top:10px;background:#fff;color:var(--olive);border-radius:20px;padding:3px 10px;font-size:13px}
+.card .c{padding:12px;font-size:13.5px}.card h4{font-family:'Playfair Display';font-size:18px;color:var(--olive)}
+.pro{color:#4E6B32}.con{color:var(--terra-d)}
+.profile{background:var(--olive);color:#F4EFE2;border-radius:16px;padding:16px;font-size:14px}
+.profile h4{font-family:'Playfair Display';font-size:19px;color:#fff;margin-bottom:8px}
+.profile dl{display:grid;grid-template-columns:120px 1fr;gap:4px 10px}.profile dt{opacity:.7}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.btn{padding:13px 18px;border-radius:14px;font-weight:600;border:none;cursor:pointer;font-size:15px;font-family:inherit;text-decoration:none}
+.wa{background:#25A35A;color:#fff}.tour{background:var(--terra);color:#fff}
+section{max-width:1000px;margin:60px auto;padding:0 20px}
+section h2{font-size:30px;text-align:center;margin-bottom:22px}
+.steps{display:grid;gap:12px;grid-template-columns:1fr}@media(min-width:720px){.steps{grid-template-columns:repeat(5,1fr)}}
+.step{background:#fff;border-radius:16px;padding:16px;border:1px solid #EEE7D8}.step b{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--terra);color:#fff;margin-bottom:8px}
+.dd{display:grid;gap:12px;grid-template-columns:1fr}@media(min-width:720px){.dd{grid-template-columns:repeat(3,1fr)}}
+.light{background:#fff;border-radius:16px;padding:16px;border-left:6px solid}
+.makler{background:var(--sage);border-radius:22px;padding:28px;text-align:center}
+.makler a{color:var(--terra-d);font-weight:600}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
+.hidden{display:none}
+@media(max-width:600px){nav{display:none}.inputrow input{min-width:0;font-size:15px}.mic,.send{width:42px;height:42px}}
+</style></head><body>
+<header><div class="logo">Immo<span>Concierge</span></div>
+<div style="display:flex;align-items:center"><div class="langs"><button class="on">DE</button><button>EN</button><button>ES</button></div><nav class="hidden-m"><a href="#makler">Für Makler</a></nav></div></header>
+<div class="hero"><h1>Erzähl uns, wie ihr an der Costa del Sol leben wollt.</h1><p class="sub">Ein Ansprechpartner. Der ganze Markt. Neutral.</p></div>
+<div class="chat"><div class="box"><div id="log">
+<div class="who">ImmoConcierge · KI-Assistent</div>
+<div class="msg bot">Hallo! Statt Suchmaske einfach ein Gespräch: Was habt ihr an der Costa del Sol vor? Tippt, sprecht – oder wählt einen Einstieg.</div>
+<div class="chips" id="start"><button class="chip" data-s="family">🏡 Auswandern mit Familie</button><button class="chip" data-s="x">☀️ Ferienhaus</button><button class="chip" data-s="x">📈 Kapitalanlage</button><button class="chip" data-s="x">🌿 Altersruhesitz</button></div>
+</div>
+<div class="inputrow"><input id="inp" placeholder="z. B. „Wir sind zu viert und wollen nach Marbella ziehen …“"><button class="mic" id="mic" title="Sprechen"><svg width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v7a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V22h2v-3.1A7 7 0 0 0 19 12z"/></svg></button><button class="send" id="send"><svg width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button></div>
+</div><p class="alt"><a href="#" onclick="alert('Prototyp: Klassische Filtersuche folgt.');return false">Lieber klassisch filtern →</a></p></div>
+
+<section id="how"><h2>So funktioniert's</h2><div class="steps">
+<div class="step"><b>1</b><strong>Gespräch</strong><br>Ihr erzählt, wie ihr leben wollt – per Chat, Sprache oder WhatsApp.</div>
+<div class="step"><b>2</b><strong>Ganzer Markt</strong><br>Wir screenen Angebote aller Partner-Makler, neutral.</div>
+<div class="step"><b>3</b><strong>Auswahl</strong><br>Ein Experte vor Ort prüft und ergänzt eure Shortlist.</div>
+<div class="step"><b>4</b><strong>Tour</strong><br>Ein Wochenende, alle Termine, eine Route, ein Ansprechpartner.</div>
+<div class="step"><b>5</b><strong>Bis zum Notar</strong><br>Wir begleiten euch bis zur Unterschrift.</div></div></section>
+<section><h2>Due-Diligence-Check</h2><p style="text-align:center;margin:-10px 0 18px;color:var(--muted)">Grundbuch, Kataster, Bebauungsplan, Bewohnbarkeit, Gemeinschaftsschulden – als Ampel. Vorprüfung, keine Rechtsberatung.</p><div class="dd">
+<div class="light" style="border-color:#5E8B3A"><strong>🟢 Unauffällig</strong><br>Eigentümer = Verkäufer, keine Lasten.</div>
+<div class="light" style="border-color:#D9A62B"><strong>🟡 Klären</strong><br>Terrasse im Kataster nicht erfasst.</div>
+<div class="light" style="border-color:#B8432E"><strong>🔴 Risiko</strong><br>Keine Bewohnbarkeitsbescheinigung (LPO).</div></div></section>
+<section id="makler"><div class="makler"><h2 style="margin-bottom:8px">Für Makler</h2><p>Vorqualifizierte internationale Käufer mit Lebensprofil und gebuchter Tour. Gleiche Konditionen für alle Partner.</p><p style="margin-top:10px"><a href="#">Partner werden →</a></p></div></section>
+<footer>Klickbarer Prototyp · alle Inhalte sind Beispiele · ImmoConcierge Costa del Sol</footer>
+
+<script>
+const log=document.getElementById('log');const hist=[];let busy=false;
+function add(h,cls){const d=document.createElement('div');d.className=cls||'';d.innerHTML=h;log.appendChild(d);return d}
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function fmt(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>')}
+function scroll(){log.lastElementChild.scrollIntoView({behavior:'smooth',block:'nearest'})}
+async function ask(text){if(busy||!text)return;busy=true;const s=document.getElementById('start');if(s)s.remove();
+ add(esc(text),'msg me');hist.push({role:'user',content:text});const ty=add('<i></i><i></i><i></i>','typing');scroll();
+ let out='',el=null;
+ try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist})});
+  if(!r.ok)throw new Error(await r.text());const rd=r.body.getReader(),dec=new TextDecoder();
+  while(true){const {done,value}=await rd.read();if(done)break;out+=dec.decode(value,{stream:true});
+   if(!el){ty.remove();add('ImmoConcierge','who');el=add('','msg bot')}el.innerHTML=fmt(out);scroll()}
+  hist.push({role:'assistant',content:out});
+ }catch(e){ty.remove();add('Entschuldigung, da ist etwas schiefgelaufen. Bitte nochmal versuchen.','msg bot')}
+ busy=false;scroll()}
+hist.push({role:'assistant',content:'Hallo! Statt Suchmaske einfach ein Gespräch: Was habt ihr an der Costa del Sol vor?'});
+document.querySelectorAll('#start .chip').forEach(b=>b.onclick=()=>ask(b.textContent.replace(/^\S+\s/,'')));
+function free(){const v=inp.value.trim();inp.value='';ask(v)}
+send.onclick=free;inp.onkeydown=e=>{if(e.key==='Enter')free()};
+mic.onclick=()=>{inp.placeholder='Spracheingabe folgt – bitte tippen';};
+document.querySelectorAll('.langs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.langs button').forEach(x=>x.classList.remove('on'));b.classList.add('on')});
+</script></body></html>
