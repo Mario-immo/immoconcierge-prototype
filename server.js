@@ -96,7 +96,7 @@ const srv=http.createServer(async(req,res)=>{
   let b='';req.on('data',c=>b+=c);req.on('end',async()=>{
    try{
     const text=String(JSON.parse(b).text||'').replace(/\*\*/g,'').slice(0,3000);if(!text){res.writeHead(400);return res.end()}
-    const r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+KEY},body:JSON.stringify({model:process.env.TTS_MODEL||'gpt-4o-mini-tts',voice:process.env.TTS_VOICE||'sage',instructions:process.env.TTS_INSTRUCTIONS||'Warm, freundlich, ruhig und natürlich, wie ein persönlicher Immobilienberater im Gespräch. Deutsche Aussprache, angenehmes Tempo, leichtes Lächeln in der Stimme.',input:text,response_format:'mp3'})});
+    const r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+KEY},body:JSON.stringify({model:process.env.TTS_MODEL||'gpt-4o-mini-tts',voice:process.env.TTS_VOICE||'ash',instructions:process.env.TTS_INSTRUCTIONS||'Warme, ruhige, freundliche männliche Stimme, wie ein persönlicher Immobilienberater im vertrauten Gespräch. Natürliche deutsche Aussprache, entspanntes Tempo, sympathisch und zugewandt, mit einem leichten Lächeln in der Stimme.',input:text,response_format:'mp3'})});
     if(!r.ok){console.error('tts',r.status,(await r.text()).slice(0,300));res.writeHead(502);return res.end('Fehler '+r.status)}
     res.writeHead(200,{'Content-Type':'audio/mpeg','Cache-Control':'no-store'});res.end(Buffer.from(await r.arrayBuffer()));
    }catch(e){console.error(e.message);if(!res.headersSent)res.writeHead(500);res.end('Serverfehler')}
