@@ -99,6 +99,7 @@ const srv=http.createServer(async(req,res)=>{
     res.writeHead(200,{'Content-Type':'audio/mpeg','Cache-Control':'no-store'});res.end(Buffer.from(await r.arrayBuffer()));
    }catch(e){console.error(e.message);if(!res.headersSent)res.writeHead(500);res.end('Serverfehler')}
   });return}
+ const im=/^\/img\/([a-z0-9-]+\.webp)$/.exec(req.url.split('?')[0]);if(im){const f=path.join(__dirname,'public/img',im[1]);if(fs.existsSync(f)){res.writeHead(200,{'Content-Type':'image/webp','Cache-Control':'public, max-age=86400'});return fs.createReadStream(f).pipe(res)}res.writeHead(404);return res.end()}
  res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});fs.createReadStream(path.join(__dirname,'public/index.html')).pipe(res);
 });
 srv.listen(PORT,()=>console.log('ImmoConcierge läuft auf http://localhost:'+PORT+' Modell '+MODEL));
