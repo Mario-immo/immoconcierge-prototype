@@ -60,13 +60,16 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
 .hidden{display:none}
 @media(max-width:600px){nav{display:none}.inputrow input{min-width:0;font-size:15px}.mic,.send,.spk{width:42px;height:42px}}
 .sc{display:grid;grid-template-columns:1fr 34px;gap:2px 8px;font-size:12px;margin:8px 0;align-items:center}.bar{height:6px;background:#EEE7D8;border-radius:3px;overflow:hidden;position:relative}.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--olive);border-radius:3px}.sc span{grid-column:1/-1;color:var(--muted);font-size:11.5px;margin-bottom:-2px}.demo{position:absolute;left:10px;top:10px;background:rgba(43,42,38,.75);color:#fff;font-size:10.5px;padding:2px 8px;border-radius:10px}.img svg{position:absolute;bottom:0;left:0;width:100%;height:60%;opacity:.35}.meta{color:var(--muted);font-size:12.5px;margin:2px 0 4px}.price{font-weight:600;color:var(--terra-d)}#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:9}#toast.on{opacity:1}
+.form{background:#fff;border:1px solid #EEE7D8;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;max-width:440px}.form input[type=email],.form input[type=tel]{border:1px solid var(--sage);border-radius:12px;padding:11px;font-size:15px;font-family:inherit}.form label{font-size:13px;display:flex;gap:8px;align-items:flex-start}.form .err{color:#B33;font-size:12.5px;min-height:14px}.btn[disabled]{opacity:.45;cursor:not-allowed}.demohint{font-size:11.5px;color:var(--muted)}
+.phone{background:#E5DDD5;border-radius:16px;padding:12px;max-width:380px}.phone .hd{font-size:12px;color:#555;margin-bottom:6px}.phone .bub{background:#fff;border-radius:10px;padding:9px 12px;font-size:14px;box-shadow:0 1px 1px rgba(0,0,0,.1)}.phone .rep{background:#DCF8C6;margin:8px 0 0 auto;width:max-content;border-radius:10px;padding:7px 12px;font-size:14px}
+.ok{color:#2E7D32;font-weight:600}.lead dd a{color:#F4D9B0}.lead .chk{font-size:13px;margin-top:10px;opacity:.85}
 </style></head><body>
 <header><div class="logo">Immo<span>Concierge</span></div>
 <div style="display:flex;align-items:center"><div class="langs"><button class="on">DE</button><button>EN</button><button>ES</button></div><nav class="hidden-m"><a href="#makler">Für Makler</a></nav></div></header>
 <div class="hero"><h1>Erzähl uns, wie ihr an der Costa del Sol leben wollt.</h1><p class="sub">Ein Ansprechpartner. Der ganze Markt. Neutral.</p></div>
 <div class="chat"><div class="box"><div id="log">
 <div class="who">ImmoConcierge · KI-Assistent</div>
-<div class="msg bot">Hallo! Statt Suchmaske einfach ein Gespräch: Was habt ihr an der Costa del Sol vor? Tippt, sprecht – oder wählt einen Einstieg.</div>
+<div class="msg bot">Hallo! Statt Suchmaske einfach ein Gespräch: Erzähl mal: Was hast du an der Costa del Sol vor? Tippe, sprich – oder wähle einen Einstieg.</div>
 <div class="chips" id="start"><button class="chip" data-s="family">🏡 Auswandern mit Familie</button><button class="chip" data-s="x">☀️ Ferienhaus</button><button class="chip" data-s="x">📈 Kapitalanlage</button><button class="chip" data-s="x">🌿 Altersruhesitz</button></div>
 </div>
 <div class="inputrow"><button class="spk" id="spk" title="Antworten vorlesen">🔇</button><input id="inp" placeholder="z. B. „Wir sind zu viert und wollen nach Marbella ziehen …“"><button class="mic" id="mic" title="Sprechen"><svg width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v7a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V22h2v-3.1A7 7 0 0 0 19 12z"/></svg></button><button class="send" id="send"><svg width="20" height="20" fill="#fff" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button></div><div id="vstat"></div>
@@ -92,26 +95,46 @@ function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
 function fmt(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>')}
 function scroll(){log.lastElementChild.scrollIntoView({behavior:'smooth',block:'nearest'})}
 
-const SUBS=['Budget','Lage','Familie/Schule','Homeoffice','Freizeit/Golf','Flughafen'];
 const house='<svg viewBox="0 0 200 60" preserveAspectRatio="none"><path d="M0 60V38l30-14 30 14V20l40-18 40 18v18l30-12 30 12v22z" fill="#fff"/></svg>';
-function cards(list){const eur=n=>n.toLocaleString('de-DE')+' €';
- return '<div class="ideas"><span class="tag">Beispielobjekte – Demo</span><h3>Erste Vorschläge für euch</h3><div class="cards">'+list.map(p=>`<div class="card"><div class="img" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">${house}<span class="demo">Beispielobjekt – Demo</span><b>Match ${p.total} %</b></div><div class="c"><h4>${esc(p.type)} · ${esc(p.region)}</h4><div class="meta"><span class="price">${eur(p.price)}</span> · ${p.m2} m² · ${p.bed} Schlafz.${p.pool?' · Pool':''}${p.sea?' · Meerblick':''}</div><div>${esc(p.desc)}</div><div class="sc">${SUBS.map(k=>`<span>${k}</span><div class="bar"><i style="width:${p.sub[k]}%"></i></div><b>${p.sub[k]}</b>`).join('')}</div><div class="pro">${esc(p.why)}</div></div></div>`).join('')+'</div></div>';}
+const eur=n=>n.toLocaleString('de-DE')+' €';
+const state={profile:null,top:[],links:[],name:'',channel:'',contact:''};
+function cards(list){
+ return '<div class="ideas"><span class="tag">Beispielobjekte – Demo</span><h3>Erste Vorschläge für dich</h3><div class="cards">'+list.map(p=>{const am=[p.pool&&(p.community?'Gemeinschaftspool':'Pool'),p.gym&&'Gym',p.parking&&'Parkplatz',p.elevator&&'Fahrstuhl',p.garden&&'Garten',p.guest&&'Gästezimmer',p.sea&&'Meerblick'].filter(Boolean).join(' · ');
+ return `<div class="card"><div class="img" style="background:linear-gradient(135deg,${p.g[0]},${p.g[1]})">${house}<span class="demo">Beispielobjekt – Demo</span><b>Match ${p.total} %</b></div><div class="c"><h4>${esc(p.type)} · ${esc(p.region)}</h4><div class="meta"><span class="price">${eur(p.price)}</span> · ${p.m2} m² · ${p.bed} Schlafz.</div><div class="meta">${am}${p.community?' · Wohnanlage':''}</div><div>${esc(p.desc)}</div><div class="sc">${Object.entries(p.sub).map(([k,v])=>`<span>${k}</span><div class="bar"><i style="width:${v}%"></i></div><b>${v}</b>`).join('')}</div><div class="pro">${esc(p.why)}</div></div></div>`}).join('')+'</div></div>';}
 function toast(t){let d=document.getElementById('toast');if(!d){d=document.createElement('div');d.id='toast';document.body.appendChild(d)}d.textContent=t;d.classList.add('on');setTimeout(()=>d.classList.remove('on'),2200)}
+function contactForm(name,channel){state.name=name;state.channel=channel;const wa=channel==='whatsapp';
+ const f=add(`<span class="tag">Demo – es wird nichts gesendet oder gespeichert</span><b>${wa?'Deine WhatsApp-Nummer':'Deine E-Mail-Adresse'}</b><input id="cval" type="${wa?'tel':'email'}" placeholder="${wa?'+49 170 1234567':'name@beispiel.de'}"><label><input type="checkbox" id="consent"> <span>Ich bin einverstanden, dass ImmoConcierge meine Angaben zur Objektsuche an ausgewählte Partner-Makler weitergibt. <a href="#" onclick="toast('Datenschutzerklärung folgt (Platzhalter)');return false">Datenschutz</a></span></label><div class="err" id="cerr"></div><button class="btn tour" id="csend" disabled>Angebote ${wa?'per WhatsApp':'per E-Mail'} erhalten</button>`,'form');
+ const v=f.querySelector('#cval'),c=f.querySelector('#consent'),btn=f.querySelector('#csend'),er=f.querySelector('#cerr');
+ const valid=()=>wa?/^\+?[0-9][0-9 ()\/-]{6,18}$/.test(v.value.trim())&&v.value.replace(/\D/g,'').length>=8:/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.value.trim());
+ const upd=()=>{btn.disabled=!c.checked;er.textContent=''};v.oninput=upd;c.onchange=upd;
+ btn.onclick=()=>{if(!valid()){er.textContent=wa?'Bitte eine gültige Handynummer mit Ländervorwahl eingeben.':'Bitte eine gültige E-Mail-Adresse eingeben.';return}
+  state.contact=v.value.trim();f.querySelectorAll('input,button').forEach(x=>x.disabled=true);verify()};scroll();setTimeout(()=>v.focus(),50)}
+function verify(){const wa=state.channel==='whatsapp';
+ add('ImmoConcierge','who');add(`Danke, ${esc(state.name)}! Wir schicken dir kurz eine Nachricht – antworte mit „Ja“, dann wissen wir, dass du es bist.`,'msg bot');
+ const p=add(`<div class="hd">${wa?'📱 WhatsApp':'✉️ E-Mail'} an ${esc(state.contact)} · <b>Demo-Ansicht, nicht wirklich gesendet</b></div><div class="bub">Hallo ${esc(state.name)}, hier ist ImmoConcierge 👋 Bitte bestätige mit „Ja“, dass du deine Objektvorschläge an ${wa?'diese Nummer':'diese Adresse'} erhalten möchtest.</div><div style="margin-top:10px"><button class="btn wa" id="yes">Mit Ja antworten (Demo)</button></div>`,'phone');
+ p.querySelector('#yes').onclick=e=>{e.target.remove();p.insertAdjacentHTML('beforeend','<div class="rep">Ja ✓✓</div>');verified()};scroll()}
+function verified(){const q=state.profile||{},yn=x=>x?'ja':'—';const L=(k,v)=>{if(!v)return '';v=String(v);v=v[0].toUpperCase()+v.slice(1);return `<dt>${k}</dt><dd>${esc(v)}</dd>`};
+ const am=['pool','gym','parking','elevator','garden','community'].filter(k=>q[k]).map(k=>({pool:'Pool',gym:'Fitnessstudio',parking:'Parkplatz',elevator:'Fahrstuhl',garden:'Garten',community:'Wohnanlage'})[k]).join(', ');
+ const ls=[q.beach_near&&'Strand',q.guests&&'oft Besuch',q.golf&&'Golf',q.homeoffice&&'Homeoffice',q.kids_school&&'Schule'].filter(Boolean).join(', ');
+ add('<span class="ok">✅ Kontakt verifiziert (Demo)</span>','msg bot');
+ add(`<h4>Lead-Profil – so sieht es der Partner-Makler</h4><dl>${L('Name',state.name)}${L(state.channel==='whatsapp'?'WhatsApp':'E-Mail',state.contact+' ✓ verifiziert')}${L('Situation',q.situation)}${L('Zweck',q.purpose)}${L('Budget',q.budget_max&&('bis '+eur(q.budget_max)))}${L('Regionen',(q.regions||[]).join(', '))}${L('Objektart',q.property_type&&(q.property_type+(q.bedrooms_min?', ab '+q.bedrooms_min+' Schlafz.':'')))}${L('Ausstattung',am)}${L('Lebensstil',ls)}${L('Flughafen',q.airport_max_min&&('max. '+q.airport_max_min+' Min.'))}${L('Zeitrahmen',q.timeline)}${L('Finanzierung',q.financing)}${L('Top-Matches',state.top.map(p=>p.id+' ('+p.total+' %)').join(', '))}${L('Eigene Links',state.links.join(' , ')||'keine')}${L('Einwilligung','Weitergabe an Partner-Makler ✓')}</dl><div class="chk">Demo: Nichts wurde gesendet oder gespeichert.</div>`,'profile lead');
+ add('ImmoConcierge','who');add(`Perfekt, ${esc(state.name)} – du bist verifiziert. Unsere Kollegen vor Ort melden sich ${state.channel==='whatsapp'?'per WhatsApp':'per E-Mail'} mit deiner geprüften Auswahl und können eine Besichtigungstour für dich planen.`,'msg bot');
+ hist.push({role:'assistant',content:'[Kontakt verifiziert, Lead-Profil erstellt]'});ctas();scroll()}
 function ctas(){const c=add('<button class="btn tour">Besichtigungstour anfragen</button><button class="btn wa">Berater kontaktieren</button>','cta');c.querySelectorAll('button').forEach(b=>b.onclick=()=>toast('Demo – im Prototyp noch ohne Funktion'))}
 async function ask(text){if(busy||!text)return;busy=true;const s=document.getElementById('start');if(s)s.remove();
- add(esc(text),'msg me');hist.push({role:'user',content:text});const ty=add('<i></i><i></i><i></i>','typing');scroll();
+ add(esc(text),'msg me');(text.match(/https?:\/\/\S+/g)||[]).forEach(u=>{if(!state.links.includes(u))state.links.push(u)});hist.push({role:'user',content:text});const ty=add('<i></i><i></i><i></i>','typing');scroll();
  let out='',el=null;
  try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:hist})});
   if(!r.ok)throw new Error(await r.text());const rd=r.body.getReader(),dec=new TextDecoder();
-  let raw='',shown=false;
+  let raw='',shown=false,ev=null;
   while(true){const {done,value}=await rd.read();if(done)break;raw+=dec.decode(value,{stream:true});
-   if(raw.startsWith('\u0001')){const e=raw.indexOf('\u0002');if(e<0)continue;if(!shown){shown=true;ty.remove();add(cards(JSON.parse(raw.slice(1,e))));scroll()}out=raw.slice(e+1)}else out=raw;
+   if(raw.startsWith('\u0001')){const e=raw.indexOf('\u0002');if(e<0)continue;if(!shown){shown=true;ty.remove();ev=JSON.parse(raw.slice(1,e));if(ev.kind==='contact'){}else{state.profile=ev.profile;state.top=ev.items;add(cards(ev.items))}scroll()}out=raw.slice(e+1)}else out=raw;
    if(!out)continue;if(!el){if(ty.isConnected)ty.remove();add('ImmoConcierge','who');el=add('','msg bot')}el.innerHTML=fmt(out);scroll()}
-  if(shown)ctas();
-  hist.push({role:'assistant',content:(shown?'[3 Beispielobjekte als Karten gezeigt] ':'')+out});speak(out);
+  if(ev&&ev.kind==='contact')contactForm(ev.name,ev.channel);
+  hist.push({role:'assistant',content:(ev?(ev.kind==='contact'?'[Kontaktformular angezeigt] ':'[3 Beispielobjekte als Karten gezeigt – nicht wiederholen] '):'')+out});speak(out);
  }catch(e){ty.remove();add('Entschuldigung, da ist etwas schiefgelaufen. Bitte nochmal versuchen.','msg bot')}
  busy=false;scroll()}
-hist.push({role:'assistant',content:'Hallo! Statt Suchmaske einfach ein Gespräch: Was habt ihr an der Costa del Sol vor?'});
+hist.push({role:'assistant',content:'Hallo! Statt Suchmaske einfach ein Gespräch: Erzähl mal, was hast du an der Costa del Sol vor?'});
 document.querySelectorAll('#start .chip').forEach(b=>b.onclick=()=>ask(b.textContent.replace(/^\S+\s/,'')));
 function free(){const v=inp.value.trim();inp.value='';ask(v)}
 send.onclick=free;inp.onkeydown=e=>{if(e.key==='Enter')free()};
