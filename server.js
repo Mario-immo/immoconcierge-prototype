@@ -10,7 +10,7 @@ Gesprächsablauf (insgesamt ca. 6-8 Fragen; überspringe, was der Nutzer schon g
 3. Region(en) – wenn unsicher, kurz 2-3 passende Regionen nennen (Marbella, Nueva Andalucía, Estepona, Benahavís, Mijas, Fuengirola, Benalmádena, Sotogrande, Málaga).
 4. Objektart – nenne immer alle drei: "Was suchst du: Haus/Villa, Reihenhaus/Townhouse oder Wohnung? Und wie viele Schlafzimmer?"
 5. Ausstattung in EINER Frage, passend zur Objektart. Nenne immer Fitnessstudio mit. Bei Wohnung z.B.: "Viele Wohnungen liegen in gepflegten Wohnanlagen mit Pools, Fitnessstudio und Gärten – da musst du dich um nichts kümmern. Was ist dir wichtig: Pool, Fitnessstudio, Parkplatz/Auto, Fahrstuhl, Gartenwohnung?" Bei Haus: eigener Pool, Garten, Parkplatz/Garage, Wohnanlage mit Security?
-6. Lebensstil in EINER Frage: Strand zu Fuß, oft Besuch (Gästezimmer), Golf, Homeoffice, Schule für Kinder (nur fragen, was noch offen ist; Flughafennähe darf mit rein).
+6. Lebensstil in EINER Frage: Strand zu Fuß, oft Besuch (Gästezimmer), Sport (Golf, Tennis oder Padel – an der Costa del Sol sehr verbreitet, Padel ist der Schlägersport), Homeoffice, Schule für Kinder (nur fragen, was noch offen ist; Flughafennähe darf mit rein).
 7. Zeitrahmen & Finanzierung in EINER Frage: Wann möchtest du kaufen, und ist die Finanzierung/das Eigenkapital schon geklärt?
 Sobald Frage 7 beantwortet ist, MUSST du SOFORT search_properties mit dem kompletten Profil aufrufen – frage NIE nach Name oder Kontakt, bevor die Karten gezeigt wurden. Die UI zeigt 3 Objekte als Karten mit Scoring. Deine Antwort danach: NIEMALS Objekte, Preise, Regionen oder Scores der Karten wiederholen oder aufzählen. Sag sinngemäß nur: "Hier sind schon mal ein paar gute Angebote – es sind Beispielobjekte (Demo). Unsere Kollegen vor Ort schauen sich das nochmal an und machen ggf. weitere Vorschläge. Hast du schon selbst Objekte gefunden? Dann schick uns gern den Link, wir prüfen sie und nehmen sie mit in die Auswahl auf."
 Wenn der Nutzer Links schickt: kurz bestätigen ("Danke, notiert – wir prüfen das Objekt und nehmen es in die Auswahl auf"), nichts über den Inhalt erfinden, fragen ob es noch weitere gibt. Wenn keine (weiteren) Links: zum Kontakt übergehen.
@@ -23,7 +23,7 @@ const TOOLS=[{type:'function',function:{name:'search_properties',description:'Su
  purpose:{type:'string',enum:['eigennutzung','ferien','investment','ruhestand']},budget_max:{type:'number',description:'Max. Budget in EUR'},
  regions:{type:'array',items:{type:'string'}},property_type:{type:'string',enum:['haus','reihenhaus','wohnung','egal']},bedrooms_min:{type:'number'},
  pool:B('Pool wichtig'),gym:B('Fitnessstudio wichtig'),parking:B('Auto/Parkplatz nötig'),elevator:B('Fahrstuhl wichtig'),garden:B('Garten/Gartenwohnung wichtig'),community:B('Gepflegte Wohnanlage mit Annehmlichkeiten gewünscht'),
- beach_near:B('Strand zu Fuß'),guests:B('Oft Besuch, Gästezimmer'),golf:B(''),homeoffice:B(''),kids_school:B('Kinder/Schule wichtig'),sea_view:B(''),quiet:B('Ruhe/Natur'),
+ beach_near:B('Strand zu Fuß'),guests:B('Oft Besuch, Gästezimmer'),golf:B(''),tennis:B('Tennis wichtig'),padel:B('Padel (Schlägersport) wichtig'),homeoffice:B(''),kids_school:B('Kinder/Schule wichtig'),sea_view:B(''),quiet:B('Ruhe/Natur'),
  airport_max_min:{type:'number',description:'Max. Minuten zum Flughafen Málaga'},
  timeline:{type:'string',description:'Wann kaufen, z.B. in 3-6 Monaten'},financing:{type:'string',description:'z.B. Eigenkapital vorhanden / Finanzierung offen'}},required:['budget_max','property_type','timeline','financing']}}},
  {type:'function',function:{name:'request_contact',description:'Zeigt das Kontaktformular mit Einwilligung und Verifizierung, sobald Name und Kanal bekannt sind.',parameters:{type:'object',properties:{name:{type:'string'},channel:{type:'string',enum:['email','whatsapp']}},required:['name','channel']}}}];
@@ -39,14 +39,16 @@ function score(p,q){
  const ho=q.homeoffice?(p.fiber?(p.bed>=3?100:80):35):85;
  const golf=q.golf?cl(100-p.golf*10):75;
  const am=q.airport_max_min||60;const air=p.airport<=am?cl(100-p.airport/4+10):cl(70-(p.airport-am)*3);
- const lb=cl((golf+ho+air)/3);
+ const tennis=q.tennis?cl(100-p.tennis*12):75;const padel=q.padel?cl(100-p.padel*12):75;
+ const sp=[q.golf&&golf,q.tennis&&tennis,q.padel&&padel].filter(x=>x!==false&&x!==undefined);const sport=sp.length?sp.reduce((a,b)=>a+b,0)/sp.length:75;
+ const lb=cl((sport+ho+air)/3);
  const w={budget:3,art:t?3:0.5,lage:2,aus:want.length?2:0.5,fam:(q.kids_school||q.guests)?1.5:0.5,lb:1.5};
- const sub={Budget:budget,Objektart:art,Lage:lage,Ausstattung:aus,'Familie/Gäste':fam,'Lifestyle (Golf/Homeoffice/Flughafen)':lb};
+ const sub={Budget:budget,Objektart:art,Lage:lage,Ausstattung:aus,'Familie/Gäste':fam,'Sport/Lifestyle':lb};
  const tw=w.budget+w.art+w.lage+w.aus+w.fam+w.lb;
  const total=Math.round((budget*w.budget+art*w.art+lage*w.lage+aus*w.aus+fam*w.fam+lb*w.lb)/tw);
  const why=[];if(p.price<=b)why.push('im Budget');if(t&&p.kind===t)why.push('gewünschte Objektart');if(p.community&&(q.community||q.gym||q.pool))why.push('gepflegte Anlage'+(p.gym?' mit Gym':''));
  if(q.garden&&p.garden)why.push('Garten');if(q.parking&&p.parking)why.push('Parkplatz');if(q.elevator&&p.elevator)why.push('Fahrstuhl');if(q.guests&&p.guest)why.push('Gästezimmer');
- if(q.golf&&p.golf<=1)why.push('Golf in '+p.golf+' km');if(q.kids_school&&p.school<=6)why.push('int. Schule in '+p.school+' km');
+ if(q.golf&&p.golf<=1)why.push('Golf in '+p.golf+' km');if(q.tennis&&p.tennis<=1.5)why.push('Tennis in '+p.tennis+' km');if(q.padel&&p.padel<=1.5)why.push('Padel in '+p.padel+' km');if(q.kids_school&&p.school<=6)why.push('int. Schule in '+p.school+' km');
  if(q.homeoffice&&p.fiber)why.push('Glasfaser');if(q.beach_near&&p.beach<=1.5)why.push('Strand '+p.beach+' km');if(p.airport<=am)why.push(p.airport+' Min. Flughafen');
  return {...p,total,sub,why:why.length?'Passt, weil: '+why.slice(0,5).join(', ')+'.':'Solide Alternative zum Profil.'};
 }
@@ -94,7 +96,7 @@ const srv=http.createServer(async(req,res)=>{
   let b='';req.on('data',c=>b+=c);req.on('end',async()=>{
    try{
     const text=String(JSON.parse(b).text||'').replace(/\*\*/g,'').slice(0,3000);if(!text){res.writeHead(400);return res.end()}
-    const r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+KEY},body:JSON.stringify({model:process.env.TTS_MODEL||'gpt-4o-mini-tts',voice:process.env.TTS_VOICE||'coral',instructions:process.env.TTS_INSTRUCTIONS||'Warm, freundlich, ruhig und natürlich, wie ein persönlicher Immobilienberater im Gespräch. Deutsche Aussprache, angenehmes Tempo, leichtes Lächeln in der Stimme.',input:text,response_format:'mp3'})});
+    const r=await fetch('https://api.openai.com/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+KEY},body:JSON.stringify({model:process.env.TTS_MODEL||'gpt-4o-mini-tts',voice:process.env.TTS_VOICE||'sage',instructions:process.env.TTS_INSTRUCTIONS||'Warm, freundlich, ruhig und natürlich, wie ein persönlicher Immobilienberater im Gespräch. Deutsche Aussprache, angenehmes Tempo, leichtes Lächeln in der Stimme.',input:text,response_format:'mp3'})});
     if(!r.ok){console.error('tts',r.status,(await r.text()).slice(0,300));res.writeHead(502);return res.end('Fehler '+r.status)}
     res.writeHead(200,{'Content-Type':'audio/mpeg','Cache-Control':'no-store'});res.end(Buffer.from(await r.arrayBuffer()));
    }catch(e){console.error(e.message);if(!res.headersSent)res.writeHead(500);res.end('Serverfehler')}
