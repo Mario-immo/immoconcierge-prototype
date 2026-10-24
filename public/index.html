@@ -113,7 +113,7 @@ function verify(){const wa=state.channel==='whatsapp';
  add('ImmoConcierge','who');add(`Danke, ${esc(state.name)}! Wir schicken dir kurz eine Nachricht – antworte mit „Ja“, dann wissen wir, dass du es bist.`,'msg bot');
  const p=add(`<div class="hd">${wa?'📱 WhatsApp':'✉️ E-Mail'} an ${esc(state.contact)} · <b>Demo-Ansicht, nicht wirklich gesendet</b></div><div class="bub">Hallo ${esc(state.name)}, hier ist ImmoConcierge 👋 Bitte bestätige mit „Ja“, dass du deine Objektvorschläge an ${wa?'diese Nummer':'diese Adresse'} erhalten möchtest.</div><div style="margin-top:10px"><button class="btn wa" id="yes">Mit Ja antworten (Demo)</button></div>`,'phone');
  p.querySelector('#yes').onclick=e=>{e.target.remove();p.insertAdjacentHTML('beforeend','<div class="rep">Ja ✓✓</div>');verified()};scroll()}
-function verified(){const q=state.profile||{},yn=x=>x?'ja':'—';const L=(k,v)=>{if(!v)return '';v=String(v);v=v[0].toUpperCase()+v.slice(1);return `<dt>${k}</dt><dd>${esc(v)}</dd>`};
+function verified(){const q=state.profile||{},yn=x=>x?'ja':'—';const L=(k,v)=>{if(!v)return '';v=String(v);if(!/^https?:/.test(v))v=v[0].toUpperCase()+v.slice(1);return `<dt>${k}</dt><dd>${esc(v)}</dd>`};
  const am=['pool','gym','parking','elevator','garden','community'].filter(k=>q[k]).map(k=>({pool:'Pool',gym:'Fitnessstudio',parking:'Parkplatz',elevator:'Fahrstuhl',garden:'Garten',community:'Wohnanlage'})[k]).join(', ');
  const ls=[q.beach_near&&'Strand',q.guests&&'oft Besuch',q.golf&&'Golf',q.homeoffice&&'Homeoffice',q.kids_school&&'Schule'].filter(Boolean).join(', ');
  add('<span class="ok">✅ Kontakt verifiziert (Demo)</span>','msg bot');

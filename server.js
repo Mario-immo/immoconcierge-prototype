@@ -9,7 +9,7 @@ Gesprächsablauf (insgesamt ca. 6-8 Fragen; überspringe, was der Nutzer schon g
 2. Budget.
 3. Region(en) – wenn unsicher, kurz 2-3 passende Regionen nennen (Marbella, Nueva Andalucía, Estepona, Benahavís, Mijas, Fuengirola, Benalmádena, Sotogrande, Málaga).
 4. Objektart – nenne immer alle drei: "Was suchst du: Haus/Villa, Reihenhaus/Townhouse oder Wohnung? Und wie viele Schlafzimmer?"
-5. Ausstattung in EINER Frage, passend zur Objektart. Bei Wohnung z.B.: "Viele Wohnungen liegen in gepflegten Wohnanlagen mit Pools, Fitnessstudio und Gärten – da musst du dich um nichts kümmern. Was ist dir wichtig: Pool, Fitnessstudio, Parkplatz/Auto, Fahrstuhl, Gartenwohnung?" Bei Haus: eigener Pool, Garten, Parkplatz/Garage, Wohnanlage mit Security?
+5. Ausstattung in EINER Frage, passend zur Objektart. Nenne immer Fitnessstudio mit. Bei Wohnung z.B.: "Viele Wohnungen liegen in gepflegten Wohnanlagen mit Pools, Fitnessstudio und Gärten – da musst du dich um nichts kümmern. Was ist dir wichtig: Pool, Fitnessstudio, Parkplatz/Auto, Fahrstuhl, Gartenwohnung?" Bei Haus: eigener Pool, Garten, Parkplatz/Garage, Wohnanlage mit Security?
 6. Lebensstil in EINER Frage: Strand zu Fuß, oft Besuch (Gästezimmer), Golf, Homeoffice, Schule für Kinder (nur fragen, was noch offen ist; Flughafennähe darf mit rein).
 7. Zeitrahmen & Finanzierung in EINER Frage: Wann möchtest du kaufen, und ist die Finanzierung/das Eigenkapital schon geklärt?
 Sobald Frage 7 beantwortet ist, MUSST du SOFORT search_properties mit dem kompletten Profil aufrufen – frage NIE nach Name oder Kontakt, bevor die Karten gezeigt wurden. Die UI zeigt 3 Objekte als Karten mit Scoring. Deine Antwort danach: NIEMALS Objekte, Preise, Regionen oder Scores der Karten wiederholen oder aufzählen. Sag sinngemäß nur: "Hier sind schon mal ein paar gute Angebote – es sind Beispielobjekte (Demo). Unsere Kollegen vor Ort schauen sich das nochmal an und machen ggf. weitere Vorschläge. Hast du schon selbst Objekte gefunden? Dann schick uns gern den Link, wir prüfen sie und nehmen sie mit in die Auswahl auf."
@@ -25,7 +25,7 @@ const TOOLS=[{type:'function',function:{name:'search_properties',description:'Su
  pool:B('Pool wichtig'),gym:B('Fitnessstudio wichtig'),parking:B('Auto/Parkplatz nötig'),elevator:B('Fahrstuhl wichtig'),garden:B('Garten/Gartenwohnung wichtig'),community:B('Gepflegte Wohnanlage mit Annehmlichkeiten gewünscht'),
  beach_near:B('Strand zu Fuß'),guests:B('Oft Besuch, Gästezimmer'),golf:B(''),homeoffice:B(''),kids_school:B('Kinder/Schule wichtig'),sea_view:B(''),quiet:B('Ruhe/Natur'),
  airport_max_min:{type:'number',description:'Max. Minuten zum Flughafen Málaga'},
- timeline:{type:'string',description:'Wann kaufen, z.B. in 3-6 Monaten'},financing:{type:'string',description:'z.B. Eigenkapital vorhanden / Finanzierung offen'}},required:['budget_max']}}},
+ timeline:{type:'string',description:'Wann kaufen, z.B. in 3-6 Monaten'},financing:{type:'string',description:'z.B. Eigenkapital vorhanden / Finanzierung offen'}},required:['budget_max','property_type','timeline','financing']}}},
  {type:'function',function:{name:'request_contact',description:'Zeigt das Kontaktformular mit Einwilligung und Verifizierung, sobald Name und Kanal bekannt sind.',parameters:{type:'object',properties:{name:{type:'string'},channel:{type:'string',enum:['email','whatsapp']}},required:['name','channel']}}}];
 const cl=x=>Math.max(0,Math.min(100,Math.round(x)));
 function score(p,q){
